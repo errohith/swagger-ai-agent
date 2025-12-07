@@ -55,3 +55,34 @@ Security note
 Contact
 
 If you want, I can prepare a GitHub Actions workflow, a `CONTRIBUTING.md`, or run additional scaffolding before you push.
+
+## Environment & Quick Start (PowerShell)
+
+Copy `.env.example` to `.env` and customize environment values as needed. Do not commit secrets into source control.
+
+- Env files present in the repo:
+	- `.env` — local runtime (copy from `.env.example`)
+	- `.env.development` — development settings (debug logging)
+	- `.env.test` — test/CI settings
+	- `.env.production` — production defaults
+
+- Key vars: `NODE_ENV`, `PORT`, `LOG_LEVEL`, `SPEC_STORAGE`, `DEFAULT_TIMEOUT_MS`
+
+Run locally (PowerShell):
+```powershell
+# install deps
+npm install
+
+# run in development (uses npm script `dev` if available)
+npm run dev
+
+# build
+npm run build
+
+# run tests
+npm test
+```
+
+Notes:
+- `SPEC_STORAGE=memory` is the default for Phase 3; in-memory repositories are used.
+- Use `.env.example` as a template. Keep secrets out of source control.
