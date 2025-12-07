@@ -15,15 +15,15 @@ export class SwaggerParserAdapter {
     try {
       return JSON.parse(raw);
     } catch (_) {
-      // Try YAML via dynamic import of `js-yaml` if available
+      // Try YAML via dynamic import of `js-yaml` if available.
+      // Use a loose `any` import to avoid strict type dependency on `@types/js-yaml`.
       try {
-        // dynamic import so that dependency is optional in Phase 3
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const yaml = await import('js-yaml');
-        return yaml.load(raw);
+        const yamlModule: any = await import('js-yaml');
+        return yamlModule.load(raw);
       } catch (err: any) {
         throw new Error(
-          'SwaggerParserAdapter.parse failed: raw content is not valid JSON and `js-yaml` is not available to parse YAML. Install `js-yaml` or provide JSON.'
+          'SwaggerParserAdapter.parse failed: raw content is not valid JSON and YAML parsing is unavailable. Install `js-yaml` or provide JSON.'
         );
       }
     }
@@ -31,24 +31,4 @@ export class SwaggerParserAdapter {
 }
 
 export default SwaggerParserAdapter;
-/**
- * SwaggerParserAdapter
- *
- * A thin adapter around a Swagger/OpenAPI parser library. For Phase 3 this
- * adapter provides a small stable API (`parse`) and currently performs a
- * no-op pass-through. In later micro-tasks it will call `swagger-parser`
- * or `@apidevtools/swagger-parser` to dereference and validate specs.
- */
-
-export class SwaggerParserAdapter {
-  /**
-   * Parse raw spec content (object or string) and return a standardized
-   * representation. Currently a pass-through placeholder.
-   */
-  async parse(rawSpec: unknown): Promise<any> {
-    // TODO: integrate a real parser (e.g. @apidevtools/swagger-parser)
-    return rawSpec;
-  }
-}
-
-export default SwaggerParserAdapter;
+// Phase 3: single, static `parse` method above is the intended adapter.

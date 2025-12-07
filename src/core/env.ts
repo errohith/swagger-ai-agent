@@ -37,7 +37,8 @@ export function loadEnv(): Env {
   // Build typed env with safe defaults
   const rawPort = process.env.PORT ?? '3000';
   const port = Number(rawPort);
-  if (Number.isNaN(port) || port <= 0) {
+  // Allow 0 as a valid ephemeral port (useful in tests); reject negative or NaN
+  if (Number.isNaN(port) || port < 0) {
     throw new Error(`Invalid PORT value: ${String(rawPort)}`);
   }
 

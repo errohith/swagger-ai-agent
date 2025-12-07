@@ -24,32 +24,3 @@ export class AxiosClient {
 }
 
 export default AxiosClient;
-import axios, { AxiosRequestConfig, AxiosInstance, AxiosResponse } from 'axios';
-import { getConfig } from '../../core/config';
-
-export interface HttpResponse<T = any> {
-  status: number;
-  headers: Record<string, string>;
-  data: T;
-}
-
-export class AxiosClient {
-  private client: AxiosInstance;
-
-  constructor() {
-    const config = getConfig();
-    this.client = axios.create({
-      timeout: 15000,
-      headers: { 'User-Agent': `${config.serviceName}` },
-    });
-  }
-
-  async request<T = any>(cfg: AxiosRequestConfig): Promise<HttpResponse<T>> {
-    const resp: AxiosResponse<T> = await this.client.request<T>(cfg);
-    const headers: Record<string, string> = {};
-    Object.keys(resp.headers || {}).forEach((k) => (headers[k] = String((resp.headers as any)[k])));
-    return { status: resp.status, headers, data: resp.data };
-  }
-}
-
-export default AxiosClient;

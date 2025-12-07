@@ -24,6 +24,25 @@ export function createApp(): Application {
     res.json({ message: `${config.serviceName} is running` });
   });
 
+  // Mount API routes
+  try {
+    // Lazy-load routes to avoid circular deps in early phases
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const specRoutes = require('../api/routes/spec.routes').default;
+    app.use('/spec', specRoutes);
+  } catch (e) {
+    // ignore if routes are not yet available
+  }
+
+  try {
+    // Mount environment routes when available
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const environmentRoutes = require('../api/routes/environment.routes').default;
+    app.use('/environment', environmentRoutes);
+  } catch (e) {
+    // ignore if routes are not yet available
+  }
+
   // Error handler should be last
   app.use(errorHandler);
 

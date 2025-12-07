@@ -24,46 +24,6 @@ export type NormalizedSpec = {
   raw?: any;
 };
 
-export class OpenApiNormalizer {
-  static normalize(parsedSpec: any): NormalizedSpec {
-    const spec: NormalizedSpec = {
-      id: parsedSpec?.info?.title ? `${parsedSpec.info.title}-${Date.now()}` : `spec-${Date.now()}`,
-      title: parsedSpec?.info?.title ?? 'untitled',
-      version: parsedSpec?.info?.version ?? parsedSpec?.openapi ?? parsedSpec?.swagger ?? 'unknown',
-      servers: [],
-      operations: [],
-      raw: parsedSpec,
-    };
-
-    // servers (OpenAPI v3)
-    if (Array.isArray(parsedSpec?.servers)) {
-      spec.servers = parsedSpec.servers.map((s: any) => s.url).filter(Boolean);
-    } else if (parsedSpec?.host) {
-      // OpenAPI v2 / Swagger
-      const scheme = (parsedSpec.schemes && parsedSpec.schemes[0]) || 'https';
-      const host = parsedSpec.host || '';
-      const basePath = parsedSpec.basePath || '';
-      spec.servers = [`${scheme}://${host}${basePath}`];
-    }
-
-    // Flatten paths -> operations
-    const paths = parsedSpec?.paths ?? {};
-    for (const [path, methods] of Object.entries(paths)) {
-      if (!methods || typeof methods !== 'object') continue;
-      for (const [methodRaw, op] of Object.entries(methods as Record<string, any>)) {
-        const method = methodRaw.toUpperCase();
-        const operationId = op?.operationId || `${method}_${path}`.replace(/[\/{}]/g, '_');
-        const summary = op?.summary ?? op?.description ?? '';
-        const tags = Array.isArray(op?.tags) ? op.tags : [];
-        spec.operations.push({ operationId, method, path, summary, tags });
-      }
-    }
-
-    return spec;
-  }
-}
-
-export default OpenApiNormalizer;
 import { createNormalizedSpec } from '../../domain/models/NormalizedSpec';
 import { createOperation } from '../../domain/models/Operation';
 
@@ -77,10 +37,10 @@ import { createOperation } from '../../domain/models/Operation';
  */
 
 export class OpenApiNormalizer {
-  normalize(parsedSpec: any, specId: string): import('../../domain/models/NormalizedSpec').NormalizedSpec {
+  static normalize(parsedSpec: any, specId?: string): import('../../domain/models/NormalizedSpec').NormalizedSpec {
     const info = parsedSpec?.info ?? {};
     const title = info.title || 'untitled';
-    const version = info.version || '0.0.0';
+    const version = info.version || parsedSpec?.openapi || parsedSpec?.swagger || '0.0.0';
 
     const serversRaw = parsedSpec.servers ?? (parsedSpec.host ? [{ url: parsedSpec.host }] : []);
     const servers = Array.isArray(serversRaw) ? serversRaw.map((s: any) => ({ url: s.url || s })) : [];
@@ -94,7 +54,7 @@ export class OpenApiNormalizer {
         const operationId = op.operationId || `${methodKey.toUpperCase()}_${pathKey}`;
         const operation = createOperation({
           operationId,
-          method: methodKey.toUpperCase(),
+          method: methodKey.toUpperCase() as any,
           path: pathKey,
           tags: op.tags ?? [],
           summary: op.summary || op.description,
@@ -108,7 +68,7 @@ export class OpenApiNormalizer {
     }
 
     const normalized = createNormalizedSpec({
-      id: specId,
+      id: specId ?? (info.title ? `${info.title}-${Date.now()}` : `spec-${Date.now()}`),
       title,
       version,
       servers,

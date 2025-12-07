@@ -34,20 +34,4 @@ export class McpToolRegistry {
 }
 
 export default McpToolRegistry;
-export class McpToolRegistry {
-  private registry: Map<string, { description?: string; handler: Function }> = new Map();
-
-  register(name: string, handler: Function, description?: string): void {
-    this.registry.set(name, { handler, description });
-  }
-
-  listTools(): Array<{ name: string; description?: string }> {
-    return Array.from(this.registry.entries()).map(([name, v]) => ({ name, description: v.description }));
-  }
-
-  getHandler(name: string): Function | undefined {
-    return this.registry.get(name)?.handler;
-  }
-}
-
-export default McpToolRegistry;
+// Phase 3: registry-backed implementation above is the intended implementation.

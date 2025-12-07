@@ -29,26 +29,4 @@ export class McpServer {
 }
 
 export default McpServer;
-/**
- * McpServer skeleton
- *
- * A minimal class to represent an MCP server adapter. In Phase 3 this is a
- * placeholder that will be extended to register tools and expose a programmatic
- * API for MCP tooling.
- */
-
-export class McpServer {
-  private tools: Map<string, Function> = new Map();
-
-  registerTool(name: string, fn: Function): void {
-    this.tools.set(name, fn);
-  }
-
-  async invokeTool(name: string, payload: unknown): Promise<unknown> {
-    const fn = this.tools.get(name);
-    if (!fn) throw new Error(`Tool not found: ${name}`);
-    return await Promise.resolve(fn(payload));
-  }
-}
-
-export default McpServer;
+// Phase 3: simple registry-backed MCP server implemented above.
