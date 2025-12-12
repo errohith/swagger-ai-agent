@@ -21,9 +21,9 @@ export class McpServer {
     return this.registry.list();
   }
 
-  async invoke(toolId: string, payload: any): Promise<any> {
+  async invoke(toolId: string, args: any): Promise<any> {
     const tool = this.registry.get(toolId);
-    if (!tool) throw new Error(`McpServer.invoke: tool not found: ${toolId}`);
+    if (!tool) throw new NotFoundError(`MCP tool not found: ${toolId}`, { toolId });
     return await Promise.resolve(tool.handler(payload));
   }
 }

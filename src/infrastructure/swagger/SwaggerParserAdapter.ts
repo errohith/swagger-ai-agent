@@ -1,3 +1,5 @@
+import { SpecParseError } from '../../core/errors/AppError';
+
 /**
  * SwaggerParserAdapter
  * Phase 3 skeleton that wraps a Swagger/OpenAPI parser.
@@ -22,8 +24,9 @@ export class SwaggerParserAdapter {
         const yamlModule: any = await import('js-yaml');
         return yamlModule.load(raw);
       } catch (err: any) {
-        throw new Error(
-          'SwaggerParserAdapter.parse failed: raw content is not valid JSON and YAML parsing is unavailable. Install `js-yaml` or provide JSON.'
+        throw new SpecParseError(
+          'Failed to parse OpenAPI spec: content is not valid JSON and YAML parsing is unavailable. Install js-yaml package or provide valid JSON.',
+          { parseError: err?.message }
         );
       }
     }

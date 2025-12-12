@@ -1,5 +1,6 @@
 import axios from 'axios';
 import fs from 'fs/promises';
+import { SwaggerLoaderError, ValidationError } from '../../core/errors/AppError';
 
 export type GitSource = {
   repo: string;
@@ -33,7 +34,7 @@ export class SwaggerLoader {
       return resp.data;
     } catch (err: any) {
       const msg = err?.message ?? String(err);
-      throw new Error(`SwaggerLoader.loadFromUrl failed for ${url}: ${msg}`);
+      throw new SwaggerLoaderError(url, msg, { method: 'loadFromUrl', statusCode: err?.response?.status });
     }
   }
 
@@ -46,7 +47,7 @@ export class SwaggerLoader {
       return data;
     } catch (err: any) {
       const msg = err?.message ?? String(err);
-      throw new Error(`SwaggerLoader.loadFromFile failed for ${filePath}: ${msg}`);
+      throw new SwaggerLoaderError(filePath, msg, { method: 'loadFromFile', code: err?.code });
     }
   }
 

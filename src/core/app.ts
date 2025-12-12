@@ -43,6 +43,42 @@ export function createApp(): Application {
     // ignore if routes are not yet available
   }
 
+  try {
+    // Mount execution routes when available
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const executionRoutes = require('../api/routes/execution.routes').default;
+    app.use('/execution', executionRoutes);
+  } catch (e) {
+    // ignore if routes are not yet available
+  }
+
+  try {
+    // Mount test generation routes when available
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const testgenRoutes = require('../api/routes/testgen.routes').default;
+    app.use('/testgen', testgenRoutes);
+  } catch (e) {
+    // ignore if routes are not yet available
+  }
+
+  try {
+    // Mount MCP routes when available
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const mcpRoutes = require('../api/routes/mcp.routes').default;
+    app.use('/mcp', mcpRoutes);
+  } catch (e) {
+    // ignore if routes are not yet available
+  }
+
+  try {
+    // Mount Jest MCP routes when available (Phase 13)
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const jestMcpRoutes = require('../api/routes/jest-mcp.routes').default;
+    app.use('/mcp/jest', jestMcpRoutes);
+  } catch (e) {
+    // ignore if routes are not yet available
+  }
+
   // Error handler should be last
   app.use(errorHandler);
 

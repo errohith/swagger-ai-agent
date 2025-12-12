@@ -21,6 +21,13 @@ export interface PerTestResult {
   error?: unknown;
 }
 
+export interface AggregateStats {
+  total: number;
+  passed: number;
+  failed: number;
+  errored: number;
+}
+
 export interface RunReport {
   runId: string;
   total: number;
@@ -30,6 +37,11 @@ export interface RunReport {
   startedAt?: string;
   finishedAt?: string;
   tests: PerTestResult[];
+  aggregates?: {
+    byTag?: Record<string, AggregateStats>;
+    byMethod?: Record<string, AggregateStats>;
+    byPath?: Record<string, AggregateStats>;
+  };
 }
 
 export function createEmptyRunReport(runId: string): RunReport {

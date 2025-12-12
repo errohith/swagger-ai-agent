@@ -1,0 +1,780 @@
+{
+	"info": {
+		"_postman_id": "swagger-ai-agent-collection",
+		"name": "Swagger AI Agent - Complete API Collection",
+		"description": "Complete Postman collection for Swagger AI Agent API testing and validation on localhost",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "swagger-ai-agent"
+	},
+	"item": [
+		{
+			"name": "1. Spec Management",
+			"item": [
+				{
+					"name": "Import OpenAPI Spec",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"specContent\": \"openapi: 3.0.0\\ninfo:\\n  title: Sample API\\n  version: 1.0.0\\npaths:\\n  /users:\\n    get:\\n      operationId: getUsers\\n      summary: Get all users\\n      responses:\\n        '200':\\n          description: Success\\n    post:\\n      operationId: createUser\\n      summary: Create a user\\n      responses:\\n        '201':\\n          description: Created\",\n  \"format\": \"yaml\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/spec/import",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"spec",
+								"import"
+							]
+						},
+						"description": "Import an OpenAPI specification (YAML or JSON format)"
+					},
+					"response": []
+				},
+				{
+					"name": "Validate OpenAPI Spec",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"specContent\": \"openapi: 3.0.0\\ninfo:\\n  title: Test API\\n  version: 1.0.0\\npaths:\\n  /ping:\\n    get:\\n      responses:\\n        '200':\\n          description: OK\",\n  \"format\": \"yaml\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/spec/validate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"spec",
+								"validate"
+							]
+						},
+						"description": "Validate an OpenAPI specification without importing"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Spec by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/spec/:specId",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"spec",
+								":specId"
+							],
+							"variable": [
+								{
+									"key": "specId",
+									"value": "{{SPEC_ID}}",
+									"description": "The spec ID from import response"
+								}
+							]
+						},
+						"description": "Retrieve a normalized spec by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "List Operations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/spec/:specId/operations",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"spec",
+								":specId",
+								"operations"
+							],
+							"variable": [
+								{
+									"key": "specId",
+									"value": "{{SPEC_ID}}",
+									"description": "The spec ID"
+								}
+							]
+						},
+						"description": "List all operations in a spec"
+					},
+					"response": []
+				}
+			],
+			"description": "OpenAPI Specification management endpoints"
+		},
+		{
+			"name": "2. Environment Management",
+			"item": [
+				{
+					"name": "Create Environment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"specId\": \"{{SPEC_ID}}\",\n  \"name\": \"dev\",\n  \"baseUrl\": \"http://localhost:3000\",\n  \"headers\": {\n    \"Authorization\": \"Bearer test-token\"\n  },\n  \"description\": \"Development environment\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/environment",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"environment"
+							]
+						},
+						"description": "Create a new environment configuration"
+					},
+					"response": []
+				},
+				{
+					"name": "List Environments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/environment?specId={{SPEC_ID}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"environment"
+							],
+							"query": [
+								{
+									"key": "specId",
+									"value": "{{SPEC_ID}}",
+									"description": "Filter by spec ID"
+								}
+							]
+						},
+						"description": "List all environments, optionally filtered by specId"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Environment",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"baseUrl\": \"http://localhost:4000\",\n  \"headers\": {\n    \"Authorization\": \"Bearer updated-token\",\n    \"X-API-Key\": \"test-key\"\n  },\n  \"description\": \"Updated development environment\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/environment/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"environment",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{ENV_ID}}",
+									"description": "Environment ID"
+								}
+							]
+						},
+						"description": "Update an existing environment"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Environment",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/environment/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"environment",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{ENV_ID}}",
+									"description": "Environment ID"
+								}
+							]
+						},
+						"description": "Delete an environment"
+					},
+					"response": []
+				}
+			],
+			"description": "Environment configuration management"
+		},
+		{
+			"name": "3. Test Generation",
+			"item": [
+				{
+					"name": "Generate Axios Tests - Full Spec",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"specId\": \"{{SPEC_ID}}\",\n  \"selection\": {\n    \"mode\": \"full\"\n  },\n  \"options\": {\n    \"includeHappyPath\": true,\n    \"includeNegativeTests\": true,\n    \"includeEdgeCases\": true,\n    \"includeAuthTests\": false\n  }\n}"
+						},
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/testgen/generate-axios-tests",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"testgen",
+								"generate-axios-tests"
+							]
+						},
+						"description": "Generate Axios+Jest tests for entire spec"
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Axios Tests - By Tag",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"specId\": \"{{SPEC_ID}}\",\n  \"selection\": {\n    \"mode\": \"tag\",\n    \"tags\": [\"users\", \"auth\"]\n  },\n  \"options\": {\n    \"includeHappyPath\": true,\n    \"includeNegativeTests\": true\n  }\n}"
+						},
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/testgen/generate-axios-tests",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"testgen",
+								"generate-axios-tests"
+							]
+						},
+						"description": "Generate tests for specific tags"
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Axios Tests - By Operation IDs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"specId\": \"{{SPEC_ID}}\",\n  \"selection\": {\n    \"mode\": \"operation\",\n    \"operationIds\": [\"getUsers\", \"createUser\"]\n  },\n  \"options\": {\n    \"includeHappyPath\": true,\n    \"includeNegativeTests\": false\n  }\n}"
+						},
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/testgen/generate-axios-tests",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"testgen",
+								"generate-axios-tests"
+							]
+						},
+						"description": "Generate tests for specific operations"
+					},
+					"response": []
+				},
+				{
+					"name": "Preview Generated Tests",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/testgen/spec/:specId/preview?mode=full&includeHappyPath=true",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"testgen",
+								"spec",
+								":specId",
+								"preview"
+							],
+							"query": [
+								{
+									"key": "mode",
+									"value": "full",
+									"description": "Generation mode: full, tag, or operation"
+								},
+								{
+									"key": "includeHappyPath",
+									"value": "true"
+								}
+							],
+							"variable": [
+								{
+									"key": "specId",
+									"value": "{{SPEC_ID}}"
+								}
+							]
+						},
+						"description": "Preview test generation without saving"
+					},
+					"response": []
+				}
+			],
+			"description": "Test code generation endpoints"
+		},
+		{
+			"name": "4. Test Execution",
+			"item": [
+				{
+					"name": "Execute Run Plan",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"specId\": \"{{SPEC_ID}}\",\n  \"envName\": \"dev\",\n  \"operations\": [\"getUsers\", \"createUser\"],\n  \"testTypes\": [\"happy\", \"negative\"],\n  \"options\": {\n    \"timeout\": 30000,\n    \"retryCount\": 2,\n    \"stopOnFailure\": false\n  }\n}"
+						},
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/execution/run",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"execution",
+								"run"
+							]
+						},
+						"description": "Execute a test run plan"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Run Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/execution/status/:runId",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"execution",
+								"status",
+								":runId"
+							],
+							"variable": [
+								{
+									"key": "runId",
+									"value": "{{RUN_ID}}",
+									"description": "Run ID from execution response"
+								}
+							]
+						},
+						"description": "Get execution status and results"
+					},
+					"response": []
+				},
+				{
+					"name": "Retry Failed Tests",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"runId\": \"{{RUN_ID}}\",\n  \"options\": {\n    \"timeout\": 45000,\n    \"retryCount\": 3\n  }\n}"
+						},
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/execution/retry-failed",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"execution",
+								"retry-failed"
+							]
+						},
+						"description": "Retry only failed tests from a previous run"
+					},
+					"response": []
+				}
+			],
+			"description": "Test execution and management"
+		},
+		{
+			"name": "5. MCP Tools - Swagger",
+			"item": [
+				{
+					"name": "List Operations (MCP)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"specId\": \"{{SPEC_ID}}\",\n  \"filters\": {\n    \"tags\": [\"users\"],\n    \"methods\": [\"GET\", \"POST\"]\n  }\n}"
+						},
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/mcp/swagger/list-operations",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"mcp",
+								"swagger",
+								"list-operations"
+							]
+						},
+						"description": "MCP tool to list spec operations with filters"
+					},
+					"response": []
+				},
+				{
+					"name": "Plan Run (MCP)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"specId\": \"{{SPEC_ID}}\",\n  \"envName\": \"dev\",\n  \"selection\": {\n    \"mode\": \"tag\",\n    \"tags\": [\"users\"]\n  },\n  \"testTypes\": [\"happy\", \"negative\"]\n}"
+						},
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/mcp/swagger/plan-run",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"mcp",
+								"swagger",
+								"plan-run"
+							]
+						},
+						"description": "MCP tool to create a test run plan"
+					},
+					"response": []
+				},
+				{
+					"name": "Execute Operation (MCP)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"specId\": \"{{SPEC_ID}}\",\n  \"operationId\": \"getUsers\",\n  \"envName\": \"dev\",\n  \"testCase\": {\n    \"name\": \"Get Users - Happy Path\",\n    \"type\": \"happy\",\n    \"expectedStatus\": 200,\n    \"payloadStrategy\": \"minimal\"\n  }\n}"
+						},
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/mcp/swagger/execute-operation",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"mcp",
+								"swagger",
+								"execute-operation"
+							]
+						},
+						"description": "MCP tool to execute a single operation"
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Tests (MCP)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"specId\": \"{{SPEC_ID}}\",\n  \"selection\": {\n    \"mode\": \"operation\",\n    \"operationIds\": [\"getUsers\"]\n  },\n  \"options\": {\n    \"includeHappyPath\": true,\n    \"includeNegativeTests\": true\n  }\n}"
+						},
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/mcp/swagger/generate-axios-tests",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"mcp",
+								"swagger",
+								"generate-axios-tests"
+							]
+						},
+						"description": "MCP tool to generate Axios tests"
+					},
+					"response": []
+				}
+			],
+			"description": "Model Context Protocol (MCP) Swagger tools"
+		},
+		{
+			"name": "6. MCP Tools - Jest",
+			"item": [
+				{
+					"name": "Run Jest Tests",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"testFilePath\": \"tests/generated/api-tests.spec.ts\",\n  \"testSuiteName\": \"GET /api/users\",\n  \"timeout\": 60000,\n  \"verbose\": false,\n  \"bail\": false\n}"
+						},
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/mcp/jest/run-tests",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"mcp",
+								"jest",
+								"run-tests"
+							]
+						},
+						"description": "Execute Jest tests from generated test files"
+					},
+					"response": []
+				},
+				{
+					"name": "Parse Jest Report",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"jestResultJson\": \"{\\\"numTotalTests\\\":10,\\\"numPassedTests\\\":8,\\\"numFailedTests\\\":2,\\\"testResults\\\":[]}\",\n  \"runId\": \"{{RUN_ID}}\",\n  \"aggregateByPath\": true\n}"
+						},
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/mcp/jest/parse-report",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"mcp",
+								"jest",
+								"parse-report"
+							]
+						},
+						"description": "Parse Jest JSON output into RunReport domain model"
+					},
+					"response": []
+				},
+				{
+					"name": "Jest Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:{{PORT}}/api/mcp/jest/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "{{PORT}}",
+							"path": [
+								"api",
+								"mcp",
+								"jest",
+								"health"
+							]
+						},
+						"description": "Health check for Jest MCP server"
+					},
+					"response": []
+				}
+			],
+			"description": "Model Context Protocol (MCP) Jest execution tools"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "PORT",
+			"value": "3001",
+			"type": "string",
+			"description": "Server port (default: 3001)"
+		},
+		{
+			"key": "SPEC_ID",
+			"value": "",
+			"type": "string",
+			"description": "OpenAPI Spec ID (set from Import Spec response)"
+		},
+		{
+			"key": "ENV_ID",
+			"value": "",
+			"type": "string",
+			"description": "Environment ID (set from Create Environment response)"
+		},
+		{
+			"key": "RUN_ID",
+			"value": "",
+			"type": "string",
+			"description": "Run ID (set from Execute Run response)"
+		}
+	]
+}

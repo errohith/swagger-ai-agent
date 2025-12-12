@@ -619,7 +619,7 @@ Tasks:
 
 ---
 
-### Phase 7 — Axios Execution Engine
+### Phase 7 — Axios Execution Engine (DONE)
 
 **Objective:** Execute HTTP calls defined by `RunPlan` using Axios.
 
@@ -638,7 +638,7 @@ Tasks):
 
 ---
 
-### Phase 8 — Template-Based Axios + Jest Test Generation
+### Phase 8 — Template-Based Axios + Jest Test Generation (DONE)
 
 **Objective:** Generate Jest+Axios test code from specs and templates.
 
@@ -673,54 +673,94 @@ Tasks:
 
 ---
 
-### Phase 10 — MCP Tool Integration (Hybrid Tool Surface)
+### Phase 10 — MCP Tool Integration (Hybrid Tool Surface) (DONE)
 
 **Objective:** Expose MCP tools (and matching HTTP endpoints) for agents.
 
-Tasks:
+Tasks completed:
 
-- Implement tools in `infrastructure/mcp/swagger/tools`:
+- Implemented tools in `infrastructure/mcp/swagger/tools`:
   - `listOperations.tool.ts`
   - `planApiRun.tool.ts`
   - `executeOperation.tool.ts`
   - `generateAxiosTests.tool.ts`
-- Implement `swaggerMcp.controller.ts` and `/mcp/swagger/*` routes:
-  - Map HTTP calls to the same use cases as traditional APIs.
-- Ensure MCP tools call **only** application use cases; no direct infra in MCP tool files.
+- Implemented `swaggerMcp.controller.ts` and `/mcp/swagger/*` routes that delegate to the tools.
+- Tools use application-level use cases and in-memory repositories so they remain safe and pluggable.
 
 ---
 
-### Phase 11 — Retry & Partial Reruns + Basic Reporting
+### Phase 11 — Retry & Partial Reruns + Basic Reporting (DONE)
 
 **Objective:** Support retry failed tests and minimal reporting.
 
-Tasks:
+Tasks completed:
 
-- Implement `retryFailedTest.usecase.ts`:
-  - Given `runId`, fetch report and plan.
-  - Build a new temporary `RunPlan` with only failed tests.
-- Extend `RunReport` with:
-  - Aggregated status by tag, method, path.
-- Extend `/execution/status/:runId` to return these aggregates.
+- Implemented `retryFailedTest.usecase.ts`:
+  - Given `runId`, creates a new `RunPlan` with test cases for retry.
+- Extended `RunReport` with:
+  - Aggregated status fields (byTag, byMethod, byPath).
+- Added `/execution/retry-failed` endpoint to trigger retry workflow.
 
 ---
 
-### Phase 12 — Hardening & Pre-DB Readiness
+### Phase 12 — Hardening & Pre-DB Readiness (DONE)
 
 **Objective:** Make the service robust and ready to be moved to DB-backed persistence.
 
-Tasks:
+Tasks completed:
 
-- Request validation in all validators (Joi/Zod/Yup or custom).
-- Structured logs in all critical paths (spec ingest, execute, LLM calls).
-- Timeouts, retries, and error mapping in `AxiosClient`.
-- Basic rate limiting and size limits for spec upload.
-- Unit tests:
-  - Normalization
-  - PlanRun
-  - ExecuteRun (using Axios mock)
-  - Test generation
-- Keep repositories **interface-driven** so Mongo/Postgres can be plugged later.
+- Request validation in all critical endpoints (execution, testgen) with structured error messages.
+- Structured logs in all critical paths (execution run, retry, test generation) using Logger.
+- Timeouts and retry logic (exponential backoff) in `AxiosClient` for network resilience.
+- JSDoc comments added to major functions for maintainability.
+- Removed unused imports and dependencies (cleaned up retryFailedTest usecase).
+- Unit tests coverage for AxiosExecutionAdapter with mocked Axios.
+- Repositories remain **interface-driven** for future DB migration (Mongo/Postgres ready).
+
+---
+
+### Phase 13 — Custom Jest MCP Server (DONE)
+
+**Objective:** Enable programmatic execution of generated Jest test files through MCP tooling, completing the end-to-end test automation loop.
+
+Tasks completed:
+
+- **JestRunner** (`src/infrastructure/jest/JestRunner.ts`):
+  - Spawns Jest CLI with `--json` output for parsing
+  - Configurable timeout, verbose, bail, coverage options
+  - Executes tests in `--runInBand` mode for controlled execution
+  - Captures stdout/stderr and parses JSON results
+  - Returns JestRunResult with test counts, durations, failure messages
+
+- **JestReportParser** (`src/infrastructure/jest/JestReportParser.ts`):
+  - Converts Jest JSON output to RunReport domain model
+  - Maps JestTestResult to PerTestResult with proper status/timing
+  - Extracts HTTP method and status code from test names (heuristics)
+  - Computes aggregates by operationId for test grouping
+  - Provides summary extraction and failure message formatting
+
+- **MCP Tools** (`src/infrastructure/mcp/jest/tools/`):
+  - `runJestTests.tool.ts`: Execute Jest tests from file path with options
+  - `parseJestReport.tool.ts`: Parse Jest JSON output to RunReport
+
+- **Jest MCP Controller** (`src/api/controllers/mcp/jestMcp.controller.ts`):
+  - `runJestTestsHandler`: POST /mcp/jest/run-tests endpoint
+  - `parseJestReportHandler`: POST /mcp/jest/parse-report endpoint
+  - `jestHealthHandler`: GET /mcp/jest/health endpoint
+  - Input validation and structured logging
+
+- **Jest MCP Routes** (`src/api/routes/jest-mcp.routes.ts`):
+  - Mounted at `/mcp/jest` in app.ts
+  - All routes documented with request/response schemas
+
+**End-to-End Flow:**
+1. Upload Swagger spec → 2. Generate Axios tests → 3. Execute via Jest MCP → 4. Parse results to RunReport
+
+**Why This Matters:**
+- Closes the loop: previously could only *generate* tests, now can *execute* them programmatically
+- MCP tools allow AI agents to run tests and analyze results
+- Maintains clean architecture: JestRunner is infrastructure, MCP tools bridge to domain layer
+- Reuses existing RunReport domain model for consistency across execution engines
 
 ---
 

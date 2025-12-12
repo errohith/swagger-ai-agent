@@ -13,6 +13,24 @@ export interface TestCaseDefinition {
     headers?: Record<string, string>;
     body?: unknown;
   };
+  /** Response extraction configuration for API chaining */
+  extraction?: {
+    enabled: boolean;
+    rules: Array<{
+      variableName: string;
+      strategy: 'jsonPath' | 'jqPath' | 'regex' | 'header' | 'statusCode' | 'fullBody';
+      expression: string;
+      defaultValue?: any;
+      transform?: 'toString' | 'toNumber' | 'toBoolean' | 'toArray' | 'toLowerCase' | 'toUpperCase';
+      validation?: {
+        type?: 'string' | 'number' | 'boolean' | 'object' | 'array';
+        pattern?: string;
+        required?: boolean;
+      };
+    }>;
+    scope?: 'test' | 'run' | 'global';
+    continueOnError?: boolean;
+  };
   createdAt?: string;
   updatedAt?: string;
 }

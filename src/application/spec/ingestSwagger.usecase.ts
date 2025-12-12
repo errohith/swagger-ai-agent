@@ -4,6 +4,7 @@ import OpenApiNormalizer from '../../infrastructure/swagger/OpenApiNormalizer';
 import type { SpecRepository } from '../../domain/repositories/SpecRepository';
 import { createNormalizedSpec } from '../../domain/models/NormalizedSpec';
 import { createOperation } from '../../domain/models/Operation';
+import { ValidationError, SpecParseError } from '../../core/errors/AppError';
 
 export type IngestResult = {
   specId: string;
@@ -17,7 +18,7 @@ export type IngestResult = {
  * This is a Phase 4 micro-implementation that composes Phase 3 adapters.
  */
 export async function ingestSwagger(source: SpecSource, repo: SpecRepository): Promise<IngestResult> {
-  if (!source || !repo) throw new Error('ingestSwagger requires source and repo');
+  if (!source || !repo) throw new ValidationError('ingestSwagger requires source and repo');
 
   // 1. Load raw content
   let rawText: string;
@@ -29,7 +30,7 @@ export async function ingestSwagger(source: SpecSource, repo: SpecRepository): P
     // delegate to loader (currently stubbed)
     rawText = await SwaggerLoader.loadFromGit({ repo: source.repo, ref: source.ref, filePath: source.filePath });
   } else {
-    throw new Error('Unsupported spec source type');
+    throw new ValidationError('Unsupported spec source type', { sourceType: (source as any).type });
   }
 
   // 2. Parse into JS object
