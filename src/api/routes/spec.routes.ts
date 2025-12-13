@@ -5,6 +5,7 @@ const router = Router();
 
 router.post('/import', specController.importSpecHandler);
 router.post('/validate', specController.validateSpecHandler);
+router.get('/', specController.listSpecsHandler);
 router.get('/:specId', specController.getSpecHandler);
 router.get('/:specId/operations', specController.listOperationsHandler);
 

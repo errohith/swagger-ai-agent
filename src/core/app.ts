@@ -1,4 +1,5 @@
 import express, { Application, Request, Response } from 'express';
+import cors from 'cors';
 import { getConfig } from './config';
 import requestLogger from './middlewares/requestLogger';
 import errorHandler from './middlewares/errorHandler';
@@ -7,6 +8,14 @@ import Logger from '../infrastructure/logging/Logger';
 export function createApp(): Application {
   const app = express();
   const config = getConfig();
+
+  // Enable CORS for frontend (Vite dev server on port 5173)
+  app.use(cors({
+    origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }));
 
   app.use(express.json({ limit: '5mb' }));
   app.use(express.urlencoded({ extended: false }));
@@ -29,7 +38,7 @@ export function createApp(): Application {
     // Lazy-load routes to avoid circular deps in early phases
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const specRoutes = require('../api/routes/spec.routes').default;
-    app.use('/spec', specRoutes);
+    app.use('/api/spec', specRoutes);
   } catch (e) {
     // ignore if routes are not yet available
   }
@@ -38,7 +47,7 @@ export function createApp(): Application {
     // Mount environment routes when available
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const environmentRoutes = require('../api/routes/environment.routes').default;
-    app.use('/environment', environmentRoutes);
+    app.use('/api/environment', environmentRoutes);
   } catch (e) {
     // ignore if routes are not yet available
   }
@@ -47,7 +56,7 @@ export function createApp(): Application {
     // Mount execution routes when available
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const executionRoutes = require('../api/routes/execution.routes').default;
-    app.use('/execution', executionRoutes);
+    app.use('/api/execution', executionRoutes);
   } catch (e) {
     // ignore if routes are not yet available
   }
@@ -56,7 +65,7 @@ export function createApp(): Application {
     // Mount test generation routes when available
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const testgenRoutes = require('../api/routes/testgen.routes').default;
-    app.use('/testgen', testgenRoutes);
+    app.use('/api/testgen', testgenRoutes);
   } catch (e) {
     // ignore if routes are not yet available
   }
@@ -65,7 +74,7 @@ export function createApp(): Application {
     // Mount MCP routes when available
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const mcpRoutes = require('../api/routes/mcp.routes').default;
-    app.use('/mcp', mcpRoutes);
+    app.use('/api/mcp', mcpRoutes);
   } catch (e) {
     // ignore if routes are not yet available
   }
@@ -74,7 +83,7 @@ export function createApp(): Application {
     // Mount Jest MCP routes when available (Phase 13)
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const jestMcpRoutes = require('../api/routes/jest-mcp.routes').default;
-    app.use('/mcp/jest', jestMcpRoutes);
+    app.use('/api/mcp/jest', jestMcpRoutes);
   } catch (e) {
     // ignore if routes are not yet available
   }

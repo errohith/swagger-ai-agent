@@ -1,15 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
-import InMemoryRunPlanRepository from '../../infrastructure/persistence/InMemoryRunPlanRepository';
-import InMemorySpecRepository from '../../infrastructure/persistence/InMemorySpecRepository';
-import InMemoryEnvironmentRepository from '../../infrastructure/persistence/InMemoryEnvironmentRepository';
 import { executeRunById } from '../../application/execution/executeRun.usecase';
 import { retryFailedTests } from '../../application/execution/retryFailedTest.usecase';
 import { validateRunRequest, validateRetryFailedRequest } from '../validators/execution.validator';
 import Logger from '../../infrastructure/logging/Logger';
+import RepositoryFactory from '../../infrastructure/persistence/RepositoryFactory';
 
-const runPlanRepo = new InMemoryRunPlanRepository();
-const specRepo = new InMemorySpecRepository();
-const envRepo = new InMemoryEnvironmentRepository();
+const runPlanRepo = RepositoryFactory.getRunPlanRepository();
+const specRepo = RepositoryFactory.getSpecRepository();
+const envRepo = RepositoryFactory.getEnvironmentRepository();
 
 /**
  * Execute a run plan by runId
@@ -40,6 +38,39 @@ export async function statusHandler(req: Request, res: Response, next: NextFunct
   }
 }
 
+export async function listExecutionsHandler(req: Request, res: Response, next: NextFunction) {
+  try {
+    const specId = req.query.specId as string | undefined;
+    const plans = await runPlanRepo.list();
+    
+    // Filter by specId if provided
+    const filtered = specId ? plans.filter(p => p.specId === specId) : plans;
+    
+    Logger.info('execution:list', { count: filtered.length, specId });
+    res.json(filtered);
+  } catch (err) {
+    Logger.error('execution:list:error', { error: err });
+    next(err);
+  }
+}
+
+export async function getExecutionHandler(req: Request, res: Response, next: NextFunction) {
+  try {
+    const runId = req.params.runId;
+    const plan = await runPlanRepo.getById(runId);
+    
+    if (!plan) {
+      return res.status(404).json({ error: 'Execution not found' });
+    }
+    
+    Logger.info('execution:get', { runId });
+    res.json(plan);
+  } catch (err) {
+    Logger.error('execution:get:error', { error: err });
+    next(err);
+  }
+}
+
 /**
  * Retry failed tests from a previous run
  */
@@ -58,4 +89,10 @@ export async function retryHandler(req: Request, res: Response, next: NextFuncti
   }
 }
 
-export default { runHandler, statusHandler, retryHandler };
+export default { 
+  runHandler, 
+  statusHandler, 
+  retryHandler,
+  listExecutionsHandler,
+  getExecutionHandler,
+};

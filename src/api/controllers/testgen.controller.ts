@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import InMemorySpecRepository from '../../infrastructure/persistence/InMemorySpecRepository';
 import { generateAxiosTestsFromSpec } from '../../application/testgen/generateAxiosTests.usecase';
 import { validateGenerateTestsBody } from '../validators/testgen.validator';
 import Logger from '../../infrastructure/logging/Logger';
+import RepositoryFactory from '../../infrastructure/persistence/RepositoryFactory';
 
-const specRepo = new InMemorySpecRepository();
+const specRepo = RepositoryFactory.getSpecRepository();
 
 /**
  * Generate Axios+Jest test code from spec
@@ -17,7 +17,17 @@ export async function generateHandler(req: Request, res: Response, next: NextFun
     const result = await generateAxiosTestsFromSpec(validated.specId, specRepo, validated.selection, validated.options);
     
     Logger.info('testgen:generate:complete', { specId: validated.specId, testCount: result.tests.length });
-    res.json(result);
+    
+    // Get spec to extract title for filename
+    const spec = await specRepo.getById(validated.specId);
+    const specTitle = spec?.title || 'api';
+    
+    // Format response to match frontend expectations
+    res.json({
+      testCode: result.code,
+      fileName: `${specTitle}.test.js`,
+      operationCount: result.tests.length
+    });
   } catch (err) {
     Logger.error('testgen:generate:error', { error: err });
     next(err);

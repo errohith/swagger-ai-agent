@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { validateCreateEnvironmentBody, validateUpdateEnvironmentBody } from '../validators/environment.validator';
-import InMemoryEnvironmentRepository from '../../infrastructure/persistence/InMemoryEnvironmentRepository';
 import { CreateEnvironmentUseCase } from '../../application/environment/createEnvironment.usecase';
 import { ListEnvironmentsUseCase } from '../../application/environment/listEnvironments.usecase';
 import { UpdateEnvironmentUseCase } from '../../application/environment/updateEnvironment.usecase';
 import { DeleteEnvironmentUseCase } from '../../application/environment/deleteEnvironment.usecase';
+import RepositoryFactory from '../../infrastructure/persistence/RepositoryFactory';
 
-const repo = new InMemoryEnvironmentRepository();
+const repo = RepositoryFactory.getEnvironmentRepository();
 
 export async function createEnvironmentHandler(req: Request, res: Response, next: NextFunction) {
   try {
